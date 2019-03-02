@@ -4,94 +4,67 @@ import {
   Platform, 
   StyleSheet, 
   Text, 
-  View,
-  Button,
   TouchableOpacity,
 } from 'react-native';
-
+import { Col, Row, Grid } from 'react-native-easy-grid';
 
 export default class PitchControl extends Component {
-
-
-  onStrike = () => {
-    
-    this.props.clickHandler("strike");
-  };
-
-  onBall = () => {
-
-    this.props.clickHandler("ball");
-  };
-
-  onFoul = () => {
-
-    this.props.clickHandler("foul");
-  };
-
-  onHit = () => {
-    this.props.clickHandler("hit");
-  };
 
   render() {
 
     return (
-
-        <View style={styles.pitchTrack}>
-          <View style={ styles.buttonRow } >
-            <TouchableOpacity onPress={this.onStrike} >
-              <Text style = {styles.button}>Strike</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={this.onBall} >
-              <Text style = {styles.button}>Ball</Text>
-            </TouchableOpacity>
-            <TouchableOpacity  onPress={this.onFoul} >
-              <Text style = {styles.button}>Foul</Text>
-            </TouchableOpacity>
-            <TouchableOpacity  onPress={this.onHit} >
-              <Text style = {styles.button}>HBP</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={ styles.buttonRow } >
-            <TouchableOpacity  onPress={this.onHit} >
-              <Text style = {styles.button}>Single</Text>
-            </TouchableOpacity>
-            <TouchableOpacity  onPress={this.onHit} >
-              <Text style = {styles.button}>Double</Text>
-            </TouchableOpacity>
-            <TouchableOpacity  onPress={this.onHit} >
-              <Text style = {styles.button}>Triple</Text>
-            </TouchableOpacity>
-            <TouchableOpacity  onPress={this.onHit} >
-              <Text style = {styles.button}>Home Run</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
+      <Grid>
+          <Row>
+            <Col style={styles.container}>
+                <TouchableOpacity onPress={() => this.props.clickHandler("strike")}>
+                  <Text style={styles.buttonish}>Strike</Text>
+                </TouchableOpacity>
+            </Col>
+            <Col style={styles.container}>
+                <TouchableOpacity onPress={() => this.props.clickHandler("ball")}>
+                  <Text style={styles.buttonish}>Ball</Text>
+                </TouchableOpacity>
+            </Col>
+            <Col style={styles.container}>
+                <TouchableOpacity onPress={() => this.props.clickHandler("foul")}>
+                  <Text style={styles.buttonish}>Foul</Text>
+                </TouchableOpacity>
+            </Col>
+            <Col style={styles.container}>
+                <TouchableOpacity onPress={() => this.props.clickHandler("hbp")}>
+                  <Text style={styles.buttonish}>HBP</Text>
+                </TouchableOpacity>
+            </Col>
+            <Col style={styles.container}>
+                <TouchableOpacity onPress={() => this.props.clickHandler("hit")}>
+                  <Text style={styles.buttonish}>Hit</Text>
+                </TouchableOpacity>
+            </Col>
+          </Row>
+      </Grid>
     );
   }
 }
 
 const styles = StyleSheet.create({
 
-  pitchTrack: {
-    flex: 3,
-    justifyContent :'center',
-  },
-  buttonRow: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  button: {
-    backgroundColor: 'blue',
-    borderColor: 'white',
-    borderWidth: 1,
-    borderRadius: 12,
-    color: 'white',
-    fontSize: 32,
-    fontWeight: 'bold',
-    padding: 12,
-    textAlign: 'center',
-  },
+  container: {
 
-});
+    margin: 5,
+
+  },
+  buttonish: {
+    backgroundColor: 'cyan',
+    justifyContent: 'center',
+    //width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    textAlign: 'center',
+    textAlignVertical: 'center',
+    fontSize: 28,
+    borderStyle: 'solid',
+    borderColor: 'black',
+    borderWidth: 2,
+    borderRadius: 10,
+  },
+})
