@@ -3,6 +3,7 @@ import {
   StyleSheet, 
   Text, 
   TouchableOpacity,
+  Image,
 } from 'react-native';
 import { Col, Row, Grid } from 'react-native-easy-grid';
 
@@ -16,10 +17,16 @@ export default class PitchState extends Component {
     render() {
       return (
           <Row size={1} style={styles.container}>
+
+          <Col size={15}>
+            <Image style={{marginTop: 20, marginLeft: 5, width: 75, height: 75}} source={require("./small-baseball.png")} />
+          </Col>
+          <Col size={60}>
             <TouchableOpacity onPress={() => this.props.onPitcherChange()}>       
-                <Col size={4}><Text style={styles.welcome}>{this.props.roster[this.props.pitcherStats[0].pitcherIx].name}</Text></Col>
+                <Text style={styles.welcome}>{this.props.roster[this.props.pitcherStats[0].pitcherIx].name}</Text>
             </TouchableOpacity>   
-            <Col size={2} >
+            </Col>
+            <Col size={25} >
                 <Row >
                     <Col>
                         <Text style={styles.pitchdata}>Balls:</Text>

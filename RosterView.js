@@ -58,14 +58,14 @@ export default class RosterView extends Component {
         if (this.state.callBack != null) {
             tempRow = [...tempRow, 
                 <Col key={0} size={this.state.formatRow[0]}>
-                    <TouchableOpacity onPress={() =>         this.selectedPlayer(ix)}>
-                        <Text>{this.state.roster[ix].name}</Text>
+                    <TouchableOpacity onPress={() => this.selectedPlayer(ix)}>
+                        <Text style={styles.rowText}>{this.state.roster[ix].name}</Text>
                     </TouchableOpacity>
                 </Col>];
         } else {
             tempRow = [...tempRow, 
                 <Col key={0} size={this.state.formatRow[0]}>
-                   <Text>{this.state.roster[ix].name}</Text>
+                   <Text style={styles.rowText}>{this.state.roster[ix].name}</Text>
                 </Col>];            
         }
 
@@ -73,7 +73,7 @@ export default class RosterView extends Component {
         for (var i = 0; i < maxKeys; i++)
         {
             var key = Object.keys(this.state.extraData[0])[i];
-            tempRow = [...tempRow, <Col key={i+1} size={this.state.formatRow[i+1]}><Text>{this.state.extraData[ix][key]}</Text></Col>];
+            tempRow = [...tempRow, <Col key={i+1} size={this.state.formatRow[i+1]}><Text style={styles.rowText}>{this.state.extraData[ix][key]}</Text></Col>];
         }
         return tempRow;
     };
@@ -84,13 +84,13 @@ export default class RosterView extends Component {
         var tempRow = [];
 
         //Add Name
-        tempRow = [<Col key={0} size={this.state.formatRow[0]}><Text>Name</Text></Col>];
+        tempRow = [<Col key={0} size={this.state.formatRow[0]}><Text style={styles.headerText}>Name</Text></Col>];
 
         for (var i = 0; i < maxKeys; i++)
         {
             var key = Object.keys(this.state.extraData[0])[i];
 
-            tempRow = [...tempRow, <Col key={i+1} size={this.state.formatRow[i+1]}><Text>{key}</Text></Col>];
+            tempRow = [...tempRow, <Col key={i+1} size={this.state.formatRow[i+1]}><Text style={styles.headerText}>{key}</Text></Col>];
         }
 
         return tempRow;
@@ -114,12 +114,19 @@ export default class RosterView extends Component {
 
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    backgroundColor: '#F5FCFF',
-    fontSize: 20,
-  },
+    rowText: {
+        fontSize: 32,
+        textAlign: 'left',
+    },
+    headerText: {
+        fontSize: 30,
+        fontWeight: 'bold',
+        borderColor: 'black',
+        borderBottomWidth: 2
+        
+    }
+
+
 });
 
 
