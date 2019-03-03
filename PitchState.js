@@ -17,14 +17,13 @@ export default class PitchState extends Component {
     render() {
       return (
           <Row size={1} style={styles.container}>
-
-          <Col size={15}>
-            <Image style={{marginTop: 20, marginLeft: 5, width: 75, height: 75}} source={require("./small-baseball.png")} />
-          </Col>
-          <Col size={60}>
-            <TouchableOpacity onPress={() => this.props.onPitcherChange()}>       
-                <Text style={styles.welcome}>{this.props.roster[this.props.pitcherStats[0].pitcherIx].name}</Text>
-            </TouchableOpacity>   
+            <Col size={15}>
+                <Image style={{marginTop: 20, marginLeft: 5, width: 75, height: 75}} source={require("./small-baseball.png")} />
+            </Col>
+            <Col size={60}>
+                <TouchableOpacity onPress={() => this.props.onPitcherChange()}>       
+                    <Text style={styles.welcome}>{this.props.roster[this.props.pitcherStats[0].pitcherIx].name}</Text>
+                </TouchableOpacity>   
             </Col>
             <Col size={25} >
                 <Row >

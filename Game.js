@@ -14,7 +14,7 @@ import { createStackNavigator, createAppContainer } from "react-navigation";
 import PitchControl from './PitchControl.js';
 import GameState from './GameState.js';
 import PitchState from './PitchState.js';
-
+import BatterState from './BatterState.js';
 
 
 export default class Game extends Component {
@@ -39,7 +39,8 @@ export default class Game extends Component {
             strikes: 0,
             roster: gameRoster,
             currentPitcher: 0, //Need to pass this in
-            pitcherStats: []
+            pitcherStats: [],
+            batterStats: []
         }
         this.pitch = this.pitch.bind(this);
 
@@ -51,6 +52,13 @@ export default class Game extends Component {
         //Create new pitcherStats entry:
         //TODO replace 0 with passed in prop
         this.state.pitcherStats.unshift({pitcherIx: 0, ballCount: 0, strikeCount: 0});
+
+
+        //Create new batterStats array:
+        for (var i = 0; i < gameRoster.length;i++)
+        {
+          
+        }
     }
 
     newPitcher = (pitcherIX) => {
@@ -221,11 +229,19 @@ export default class Game extends Component {
         <Grid style={styles.container}>
 
           <Row size={10}>
-            {!this.isBatting() && <PitchState onPitcherChange = {this.onPitcherClick} pitcherStats={this.state.pitcherStats} roster={this.state.roster} navigation={this.props.navigation} />}
+            {!this.isBatting() ? 
+              <PitchState onPitcherChange = {this.onPitcherClick} pitcherStats={this.state.pitcherStats} roster={this.state.roster} navigation={this.props.navigation} />
+              :
+              <BatterState />
+            }
           </Row>
 
-          <Row size={5} />
+          <Row size={5}>
+
+          </Row>
           <Row size={10}>
+
+
           <PitchControl style={styles.pitchcontrol} clickHandler = {this.pitch} />
           </Row>
           { false && <ImageBackground
@@ -247,30 +263,11 @@ export default class Game extends Component {
     }
   }
 
-/*
-  { !this.isBatting() && 
-    <View style={ {flexDirection: 'row'}}>
-      <Text style={styles.welcome}>{this.state.roster[this.state.currentPitcher].name}</Text>
-      <Text style={styles.welcome}>Pitch Count: {this.state.pitchCounts[this.state.currentPitcher]} </Text>
-    </View>
-  }
-  */
-
   const styles = StyleSheet.create({
     container: {
       flex: 1,
       flexDirection: 'column',
 
-    },
-    welcome: {
-      flex: 1,
-      fontSize: 32,
-      textAlign: 'center',
-      margin: 10,
-    },
-    pitcherpicker: {
-        flex: 1,
-        backgroundColor: 'red',
     },
     pitchcontrol: {
         flex: .5,
@@ -281,4 +278,3 @@ export default class Game extends Component {
         backgroundColor: 'green',
     }
   });
-//  <PitcherPicker style={styles.pitcherpicker} roster= {this.state.roster} onPitcherChange={this.onPitcherChange} pitchCounts={this.state.pitchCounts}/>

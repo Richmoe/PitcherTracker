@@ -28,54 +28,54 @@ class Home extends Component {
     console.log("Setting up App");
     super(props);
     this.state = { roster :  [
-        {
-            name: "Bowie Thorner Moe",
-            abbrev: "BTM",
-        },
-        {
-            name: "Leon Sievers",
-            abbrev: "LS"
-        },
-        {
-            name: "Sharif El-Shimi",
-            abbrev: "SES"
-        },        
-        {
-            name: "June Pierce",
-            abbrev: "JP"
-        },        
-        {
-            name: "Hayden Hilpert",
-            abbrev: "HH"
-        },        
-        {
-            name: "Calvin Polivka",
-            abbrev: "CP"
-        },        
-        {
-            name: "Trent Sislow",
-            abbrev: "TS"
-        },        
-        {
-            name: "Alex Merryman",
-            abbrev: "AXM"
-        },        
-        {
-            name: "Ashton Merryman",
-            abbrev: "ASM"
-        },        
-        {
-            name: "Hunter Rose",
-            abbrev: "HR"
-        },        
-        {
-            name: "Max O'Neill",
-            abbrev: "MO"
-        },        
-        {
-            name: "Felix Hester",
-            abbrev: "FH"
-        },       
+    {
+      name: "Alex Merryman",
+      abbrev: "AXM"
+    },        
+    {
+      name: "Ashton Merryman",
+      abbrev: "ASM"
+    }, 
+    {
+      name: "Bowie Thorner Moe",
+      abbrev: "BTM",
+    },
+    {
+      name: "Calvin Polivka",
+      abbrev: "CP"
+    },    
+    {
+      name: "Felix Hester",
+      abbrev: "FH"
+    }, 
+    {
+      name: "Gunner O'Neill",
+      abbrev: "GO"
+    }, 
+    {
+      name: "Hayden Hilpert",
+      abbrev: "HH"
+    },  
+    {
+      name: "Hunter Rose",
+      abbrev: "HR"
+    },   
+    {
+      name: "June Pierce",
+      abbrev: "JP"
+    },
+    {        
+      name: "Leon Sievers",
+      abbrev: "LS"
+    },
+    {
+      name: "Sherif El-Shimi",
+      abbrev: "SES"
+    },        
+    {
+      name: "Trent Sislow",
+      abbrev: "TS"
+    },
     ]};
   }
 
