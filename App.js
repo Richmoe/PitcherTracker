@@ -24,10 +24,27 @@ import RosterView from './RosterView';
 
 class Home extends Component {
 
+
+  shuffleArray = (input) => {
+    //TODO Shuffle
+
+    for (var i = input.length-1; i >=0; i--) {
+     
+      var randomIndex = Math.floor(Math.random()*(i+1)); 
+      var itemAtIndex = input[randomIndex]; 
+       
+      input[randomIndex] = input[i]; 
+      input[i] = itemAtIndex;
+    }
+    return input;
+  };
+
+
+
   constructor(props) {
     console.log("Setting up App");
     super(props);
-    this.state = { roster :  [
+    tempRoster = [
     {
       name: "Alex Merryman",
       abbrev: "AXM"
@@ -76,8 +93,23 @@ class Home extends Component {
       name: "Trent Sislow",
       abbrev: "TS"
     },
-    ]};
+    ];
+
+    //temp shuffle my array
+    tempBattingOrder = this.shuffleArray([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11]);
+    tempFieldingPos = this.shuffleArray([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11]);
+    console.log(tempBattingOrder);
+    console.log(tempFieldingPos);
+    for (var i = 0;i < tempRoster.length;i++)
+    {
+      tempRoster[i].battingOrder = tempBattingOrder[i];
+      tempRoster[i].fieldingPos = tempFieldingPos[i];
+    }
+    console.log(tempRoster);
+
+    this.state = { roster : tempRoster };
   }
+
 
 
   render() {
