@@ -12,6 +12,30 @@ export default class BatterState extends Component {
         console.log("BatterState!");
         super(props);
 
+        //props:
+        // roster = team data array
+        // curBatter
+
+        var tempRoster = this.props.roster;
+
+        console.log(tempRoster);
+
+        //Make sure we sort by battingOrder        
+        tempRoster.sort((a,b) => a.battingOrder - b.battingOrder);
+
+        this.state = {
+          battingOrder : tempRoster,
+          curBatter : this.props.curBatter
+        }
+
+    }
+
+    batterNameAndOrder = (batterNum) => {
+      
+      var num = batterNum % this.state.battingOrder.length;
+
+      return (num+1) + ". " + this.state.battingOrder[num].name;
+ 
     }
  
     render() {
@@ -21,14 +45,14 @@ export default class BatterState extends Component {
                 <Image style={styles.batImage} source={require("./baseball-bat.png")} />
             </Col>
             <Col size={50}>
-                <Text style={styles.batter}>AT BAT (#)</Text>
+                <Text style={styles.batter}>{this.batterNameAndOrder(this.state.curBatter)}</Text>
             </Col>
             <Col size={35} >
                 <Row >
-                    <Text style={styles.onDeck}>On Deck (#)</Text>
+                    <Text style={styles.onDeck}>{this.batterNameAndOrder(this.state.curBatter + 1)}</Text>
                 </Row>
                 <Row>
-                    <Text style={styles.onDeck}>On Deck (#)</Text>
+                    <Text style={styles.onDeck}>{this.batterNameAndOrder(this.state.curBatter + 2)}</Text>
                 </Row>
             </Col>
         </Row>

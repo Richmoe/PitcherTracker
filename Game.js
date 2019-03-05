@@ -9,13 +9,12 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Col, Row, Grid } from 'react-native-easy-grid';
-import { createStackNavigator, createAppContainer } from "react-navigation";
 
 import PitchControl from './PitchControl.js';
 import GameState from './GameState.js';
 import PitchState from './PitchState.js';
 import BatterState from './BatterState.js';
-
+import PlayerStats from './PlayerStats.js';
 
 export default class Game extends Component {
 
@@ -23,9 +22,21 @@ export default class Game extends Component {
         console.log("Setting up Game ");
         super(props);
 
+        //game roster contains batting order & starting field position
         var gameRoster = this.props.navigation.getParam("roster", []);
-        console.log(gameRoster);
- 
+
+        //Create teamStats:
+        teamStats = [];
+        for (var i = 0;i<gameRoster.length;i++)
+        {
+          teamStats.push(new PlayerStats(gameRoster[i].name, gameRoster[i].battingOrder, gameRoster[i].fieldingPos));
+          //Store of current pitcher IX
+          if (gameRoster[i].fieldingPos == 0)
+          {
+            console.log("starting pitcher is ix " + i);
+            curPitcher = i;
+          }
+        }
 
         this.state = {
             opponentName: "Opp",
@@ -37,10 +48,9 @@ export default class Game extends Component {
             runs: 0,
             balls: 0,
             strikes: 0,
-            roster: gameRoster,
-            currentPitcher: 0, //Need to pass this in
-            pitcherStats: [],
-            batterStats: []
+            currentPitcher: curPitcher,
+            teamData: teamStats
+
         }
         this.pitch = this.pitch.bind(this);
 
@@ -48,63 +58,15 @@ export default class Game extends Component {
         var scoreInit = new Array(5).fill(0);
         this.state.score.push(scoreInit);
         this.state.score.push(scoreInit);
-
-        //Create new pitcherStats entry:
-        //TODO replace 0 with passed in prop
-        this.state.pitcherStats.unshift({pitcherIx: 0, ballCount: 0, strikeCount: 0});
-
-
-        //Create new batterStats array:
-        for (var i = 0; i < gameRoster.length;i++)
-        {
-          
-        }
     }
 
-    newPitcher = (pitcherIX) => {
+    inningNumber = () => { return Math.floor(this.state.inning / 2) + 1};
 
-      //skip if we already have this person as pitcher:
-      if (pitcherIX == this.state.pitcherStats[0].pitcherIx) {
-        console.log("Skipping!");
-        return;
-      }
-
-      //Copy existing pitcher stats array:
-      let tempPitcherStats = [...this.state.pitcherStats];
-      let dupIX = -1;
-
-      //Check to see if we already had this pitcher pitch some
-      for (var i = 0; i < tempPitcherStats.length; i++)
-      {
-        if (tempPitcherStats[i].pitcherIx == pitcherIX) {
-          //break out if we find it because we want the first instance
-          dupIX = i;
-          break;
-        }
-      }
-
-      if (dupIX > 0)  {
-        //Pitcher is going again so copy that record to the beginning
-        tempPitcherStats.unshift(tempPitcherStats[dupIX]);
-      } else {
-        if (dupIX == -1) {
-          //new Pitcher - prepend fresh values
-          tempPitcherStats.unshift({pitcherIx: pitcherIX, ballCount: 0, strikeCount: 0});
-        } else {
-          //we shouldn't get here since we check at top!
-          return;
-        }
-      }
-
-      //Reassign:
-      this.setState( {pitcherStats: tempPitcherStats});
-
-    }
-
+    
     isBatting = () =>  ((this.state.inning % 2) && this.state.isHome);
 
     getName (id) {
-        return this.state.roster[id].name;
+        return this.state.teamData[id].name;
     }
 
     nextBatter() {
@@ -133,20 +95,20 @@ export default class Game extends Component {
         });
     };
 
-    updatePitchCount = (pitchType) => {
+    updatePitcherStats = (pitchType) => {
 
       //We can't reassign an array element directly, so we have to copy existing pitchCount array
-      let tempPitchCount = [...this.state.pitcherStats];
+      let tempTeamData = [...this.state.teamData];
 
       if (['strike','foul','hit'].indexOf(pitchType) >= 0) {
-        tempPitchCount[0].strikeCount += 1;
+        tempTeamData[this.state.currentPitcher].pitcherStats.strikes += 1;
       } else if (['ball','hbp'].indexOf(pitchType) >= 0) {
-        tempPitchCount[0].ballCount += 1;
+        tempTeamData[this.state.currentPitcher].pitcherStats.balls += 1;
       } else {
         console.log("Invalid PitchType: " + pitchType);
       };
 
-      this.setState( {pitcherStats: tempPitchCount});
+      this.setState( {teamData: tempTeamData});
     }
 
 
@@ -158,7 +120,7 @@ export default class Game extends Component {
 
     pitch = (pitchType) => {
         //Update total pitch count if we're not at bat
-        if (!this.isBatting())  this.updatePitchCount(pitchType);
+        if (!this.isBatting())  this.updatePitcherStats(pitchType);
 
         curStrikeCount = this.state.strikes;
         curBallCount = this.state.balls;
@@ -202,24 +164,40 @@ export default class Game extends Component {
 
       //Create Roster view data. God this is ugly
       tempExtraData = [];
-      for (var i = 0;i < this.state.roster.length;i++) {
-        tempExtraData.push({Pitches: 0});
+      for (var i = 0;i < this.state.teamData.length;i++) {
+        tempExtraData.push({Pitches: (this.state.teamData[i].pitcherStats.balls + this.state.teamData[i].pitcherStats.strikes)});
       }
       console.log(tempExtraData);
 
-      for (var i = 0;i < this.state.pitcherStats.length; i++)
-      {
-        tempExtraData[this.state.pitcherStats[i].pitcherIx].Pitches = (this.state.pitcherStats[i].ballCount + this.state.pitcherStats[i].strikeCount);
-      }
-      console.log(tempExtraData);
+      this.props.navigation.navigate('RosterScreen', { roster: this.state.teamData, extraData: tempExtraData, formatRow: [80, 20], callBack: this.onPitcherChange});
+    };
 
-
-      this.props.navigation.navigate('RosterScreen', { roster: this.state.roster, extraData: tempExtraData, formatRow: [80, 20], callBack: this.onPitcherChange});
+    setPlayerPosition = (playerIx, fieldPos) => {
+        var temp = [...this.state.teamData];
+        temp[playerIx].positionByInning[this.inningNumber() - 1] = fieldPos;
     };
 
     onPitcherChange = (newPitcherId) => {
       console.log("Got Pitcher change " + newPitcherId);
-      this.newPitcher(newPitcherId);
+
+      if (newPitcherId == this.state.currentPitcher) {
+        console.log("No change in pitcher!");
+        return;
+      }
+
+
+      //baseline is to swap with other position:
+      var fieldPos = this.state.teamData[newPitcherId].positionByInning[this.inningNumber() - 1];
+      console.log("old position was " + fieldPos);
+
+      //set old pitcher to that position:
+      this.setPlayerPosition(this.state.currentPitcher, fieldPos);
+
+      //set up new pitcher
+
+      this.setPlayerPosition(newPitcherId, 0);
+      this.setState ( { currentPitcher : newPitcherId } );
+      console.log(this.state.teamData);
     }
 
 
@@ -230,9 +208,9 @@ export default class Game extends Component {
 
           <Row size={10}>
             {!this.isBatting() ? 
-              <PitchState onPitcherChange = {this.onPitcherClick} pitcherStats={this.state.pitcherStats} roster={this.state.roster} navigation={this.props.navigation} />
+              <PitchState onPitcherChange = {this.onPitcherClick} currentPitcher = {this.state.teamData[this.state.currentPitcher]} />
               :
-              <BatterState />
+              <BatterState roster={this.state.teamData} curBatter= {0}/>
             }
           </Row>
 

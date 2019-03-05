@@ -8,11 +8,7 @@ import {
 import { Col, Row, Grid } from 'react-native-easy-grid';
 
 export default class PitchState extends Component {
-    constructor(props) {
 
-        super(props);
-        console.log("Cur Pitcher: " + this.props.pitcherStats[0]);
-    }
  
     render() {
       return (
@@ -22,7 +18,7 @@ export default class PitchState extends Component {
             </Col>
             <Col size={60}>
                 <TouchableOpacity onPress={() => this.props.onPitcherChange()}>       
-                    <Text style={styles.welcome}>{this.props.roster[this.props.pitcherStats[0].pitcherIx].name}</Text>
+                    <Text style={styles.welcome}>{this.props.currentPitcher.name}</Text>
                 </TouchableOpacity>   
             </Col>
             <Col size={25} >
@@ -31,7 +27,7 @@ export default class PitchState extends Component {
                         <Text style={styles.pitchdata}>Balls:</Text>
                     </Col>
                     <Col>
-                        <Text style={styles.pitchdata}>{this.props.pitcherStats[0].ballCount}</Text>
+                        <Text style={styles.pitchdata}>{this.props.currentPitcher.pitcherStats.balls}</Text>
                     </Col>
                 </Row>
                 <Row>
@@ -39,7 +35,7 @@ export default class PitchState extends Component {
                         <Text style={styles.pitchdata}>Strikes:</Text>
                     </Col>
                     <Col>
-                        <Text style={styles.pitchdata}>{this.props.pitcherStats[0].strikeCount}</Text>
+                        <Text style={styles.pitchdata}>{this.props.currentPitcher.pitcherStats.strikes}</Text>
                     </Col>
                 </Row>
                 <Row>
@@ -47,7 +43,7 @@ export default class PitchState extends Component {
                         <Text style={styles.totaldata}>Total:</Text>
                     </Col>
                     <Col>
-                        <Text style={styles.totaldata}>{(this.props.pitcherStats[0].ballCount + this.props.pitcherStats[0].strikeCount)}</Text>
+                        <Text style={styles.totaldata}>{(this.props.currentPitcher.pitcherStats.balls + this.props.currentPitcher.pitcherStats.strikes)}</Text>
                     </Col>                   
                 </Row>
             </Col>
@@ -56,6 +52,13 @@ export default class PitchState extends Component {
    
     }
   }
+
+  /*
+                      <Text style={styles.welcome}>{this.props.roster[this.props.pitcherStats[0].pitcherIx].name}</Text>
+
+
+
+*/
 
   const styles = StyleSheet.create({
     container: {
