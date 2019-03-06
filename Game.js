@@ -15,12 +15,19 @@ import GameState from './GameState.js';
 import PitchState from './PitchState.js';
 import BatterState from './BatterState.js';
 import PlayerStats from './PlayerStats.js';
+import FieldView from './FieldView.js';
 
 export default class Game extends Component {
 
     constructor(props) {
         console.log("Setting up Game ");
         super(props);
+
+        const url = require('./baseballDiamond1.jpg');
+        const image = Image.resolveAssetSource(url);
+        console.log(image);
+
+
 
         //game roster contains batting order & starting field position
         var gameRoster = this.props.navigation.getParam("roster", []);
@@ -222,11 +229,10 @@ export default class Game extends Component {
 
           <PitchControl style={styles.pitchcontrol} clickHandler = {this.pitch} />
           </Row>
-          { false && <ImageBackground
-            source={require('./baseballDiamond1.jpg')} 
-            style={{width: "50%", height: "50%"}}
-          />}
-          <Row size={55}></Row>
+
+          <Row size={55}>
+            { true && <FieldView />}
+          </Row>
           <Row size={20}>
           <GameState style={styles.gamestate}
             balls = {this.state.balls}
