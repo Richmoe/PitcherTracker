@@ -11,12 +11,11 @@ import {
   TouchableHighlight,
   Modal,
   Picker,
+  Button,
 } from 'react-native';
 import { Col, Row, Grid } from 'react-native-easy-grid';
-import { Menu, MenuProvider, MenuOptions, MenuOption, MenuTrigger, renderers} from "react-native-popup-menu";
-
-
-const { Popover } = renderers;
+import { Menu, MenuProvider, MenuOptions, MenuOption, MenuTrigger} from "react-native-popup-menu";
+import GameState from './GameState.js';
 
 export default class HitView extends Component {
 
@@ -27,15 +26,16 @@ export default class HitView extends Component {
     baseRunners = [];
     runnerAtBase = [];
     runnerNames = [];
-    outs = [];
+    resetBaseRunners = [];
     constructor(props){
         console.log("Construct HitView");
   
         super(props);
         //props should be baserunner array
-        this.baseRunners = [0,2,3];
+        this.baseRunners = [0,1,2,3];
         this.runnerNames = ['HT', 'R1', 'R2', 'R3'];
         this.runnerAtBase = [-1,-1,-1,-1,-1,-1,-1,-1];
+        this.resetBaseRunners = [...this.baseRunners];
 
         //put runners at their bases:
         for (var i = 0;i < this.baseRunners.length; i++) {
@@ -57,9 +57,28 @@ export default class HitView extends Component {
         console.log(`Field Dims: ${this.fieldWidth} x ${this.fieldHeight} at ${this.fieldX},${this.fieldY}`);
     }
 
+    componentWillUnmount() {
+      console.log("UNMOUNTT!");
+      //This is where I update gamestate:
+      
+    }
+
+    resetRunners = () => {
+
+
+      console.log(this.resetBaseRunners);
+      this.baseRunners = [...this.resetBaseRunners];
+      this.runnerAtBase = [-1,-1,-1,-1,-1,-1,-1,-1];
+      //put runners at their bases:
+      for (var i = 0;i < this.baseRunners.length; i++) {
+        this.runnerAtBase[this.baseRunners[i]] = i;
+      }
+      console.log(this.runnerAtBase);
+      this.setState( { selectedPosition: -1});
+      
+    }
    
     advanceRunner = (ix) => {
-    
     
       if (this.runnerAtBase[(ix + 1)] != -1) {
         this.advanceRunner(ix + 1);
@@ -192,35 +211,35 @@ export default class HitView extends Component {
 
     render() {
         console.log("Rendering with pos " + this.state.selectedPosition);
-        return (
+
+         return (
           <MenuProvider>
             <View style={styles.container} onLayout = {(event) => this.onLayout(event)} >
 
               <ImageBackground  source={require('./baseballDiamond1.jpg')} style={styles.image} resizeMode='contain'>
 
                 {this.renderBaserunners()}
-                {this.state.menuOpen && 
-                <Menu style={{left:200, top: 400}} name="test" opened={this.state.menuOpen} onSelect={(value) => this.onMenuSelect(value)}>
-                  <MenuTrigger  disabled={true}/>
+               
+                <Menu opened={this.state.menuOpen} onSelect={(value) => this.onMenuSelect(value)}>
+                  <MenuTrigger customStyles={trigStyles} disabled={true}/>
                   <MenuOptions customStyles={optionStyles}>
                     <MenuOption disabled={true}><Text style={{fontSize: 28, fontWeight: 'bold'}}>{this.runnerNames[this.runnerAtBase[this.state.selectedPosition]]}</Text></MenuOption>
                     {this.renderMenuOptions()}
                   </MenuOptions>
                 </Menu>
-                }
+                <TouchableOpacity style = {styles.resetButton} onPress = {() => this.resetRunners()}> 
+                  <Text style ={styles.buttonText}>Reset</Text>
+              </TouchableOpacity >
               </ImageBackground>
             </View>
+            <View style={{flex: .25}}>
+              <GameState />
+            </View>
+
           </MenuProvider>
         );
     }
 }
-
-/*
-              <TouchableOpacity  style = {this.getStyle(this.state.selectedPos)}  onPress = {() => this.onPress(0)}> 
-                      <Text>BTM</Text>
-              </TouchableOpacity >
-
-*/
 
 const styles = StyleSheet.create({
   container: {
@@ -238,6 +257,18 @@ const styles = StyleSheet.create({
     borderWidth: 4,
     borderRadius: 64,
   },
+  resetButton: {
+    backgroundColor: 'gray',
+    justifyContent: 'center',
+    borderStyle: 'solid',
+    borderColor: 'black',
+    width: 100,
+    height: 60,
+    borderWidth: 4,
+    borderRadius: 64,
+    left: 463,
+    top: 600,
+  },
   image: {
       //flex:1,
     width: '100%', 
@@ -251,61 +282,68 @@ const styles = StyleSheet.create({
   }
 });
 
-const stylesButtonColor = [
-
-];
 
 const stylesPos = [
   {
     //Home:
     position: 'absolute',
     left: 272,
-    top: 612
+    top: 530
   },
     {
     //1st:
     position: 'absolute',
-    left: 272 + 190,
-    top: 408,
+    left: 463,
+    top: 322,
   },
   {
     //2nd:
     position: 'absolute',
     left: 272,
-    top: 219,
+    top: 137,
   },
   {
     //3rd:
     position: 'absolute',
     left: 272- 190,
-    top: 408
+    top: 322
   },
   {
     //Run 0:
     position: 'absolute',
     left: 180,
-    top: 650
+    top: 600
   },
   {
     //Run 1:
     position: 'absolute',
     left: 120,
-    top: 650,
+    top: 600,
   },
   {
     //Run 2:
     position: 'absolute',
     left: 60,
-    top: 650,
+    top: 600,
   },
   {
     //Run 3:
     position: 'absolute',
     left: 0,
-    top: 650,
+    top: 600,
   }
 ];
 
+const trigStyles = {
+  triggerText: {
+fontSize: 40,
+  },
+  triggerOuterWrapper: {
+    left:200,
+    top:200,
+    position: 'absolute'
+  }
+};
 
 const optionStyles = {
   optionTouchable: {
