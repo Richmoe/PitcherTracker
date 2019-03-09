@@ -30,6 +30,7 @@ export default class HitView extends Component {
     constructor(props){
         console.log("Construct HitView");
   
+
         super(props);
         //props should be baserunner array
         this.baseRunners = [0,1,-1,3];
@@ -70,7 +71,7 @@ export default class HitView extends Component {
       this.runnerAtBase = [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1];
       //put runners at their bases:
       for (var i = 0;i < this.baseRunners.length; i++) {
-        this.runnerAtBase[i] = i;
+        if (this.baseRunners[i] >= 0) this.runnerAtBase[i] = i;
       }
 
       this.setState( { selectedPosition: -1});
@@ -91,13 +92,9 @@ export default class HitView extends Component {
 
     resolveRunners = (startingPos, endPos) => {
 
+      //TODO Ugly refactor later
       console.log(`resolving pos ${startingPos} moving to ${endPos}`);
-
-
       var advance = (endPos - startingPos);
-      if (advance < 0)  advance=1; //in this case we are resolve from out to run
-    
- 
       var playerIX = this.runnerAtBase[startingPos];
 
       if (endPos > 4)
@@ -120,23 +117,34 @@ export default class HitView extends Component {
         console.log(this.runnerAtBase);
 
       } else { 
+        if (startingPos > endPos)
+        {
+          //move from out to run
+          console.log("Run " + playerIX);
+          console.log(this.runnerAtBase);
+          //insert at end of list and shift the other run positions:
+          for (var i = 4;i < this.runnerAtBase.length;i++)
+          {
+            if (this.runnerAtBase[i] == -1 || this.runnerAtBase[i] == playerIX)
+            {
+              this.runnerAtBase[startingPos] = -1;
+              this.runnerAtBase[i] = playerIX;
+  
+              break;
+            }
+          }
+          console.log("Aft");
+          console.log(this.runnerAtBase);
 
 
-        while (advance > 0) {
-
-          this.advanceRunner(startingPos+1);
-          --advance;
-          ++startingPos;
+        } else {
+          //Advance all base runners
+          while (advance > 0) {
+            this.advanceRunner(startingPos+1);
+            --advance;
+            ++startingPos;
+          }
         }
-
-        //put runners at their new bases:
-        /*
-        for (var i = 0;i < this.runnerAtBase.length; i++) {
-          var runner = this.runnerAtBase[i];
-          if (runner >= 0 && this.baseRunners[runner] != -1) this.baseRunners[runner] = Math.min(i,4);
-        }
-        */
-
       }
 
       this.setState( {
