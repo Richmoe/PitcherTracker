@@ -1,4 +1,3 @@
-
 import React, {Component} from 'react';
 import {
   Platform, 
@@ -8,14 +7,13 @@ import {
   View,
   Text, 
   TouchableOpacity,
-  TouchableHighlight,
-  Modal,
-  Picker,
-  Button,
+
 } from 'react-native';
-import { Col, Row, Grid } from 'react-native-easy-grid';
+
 import { Menu, MenuProvider, MenuOptions, MenuOption, MenuTrigger} from "react-native-popup-menu";
 import GameState from './GameState.js';
+
+const OUTOFFSET=8;
 
 export default class HitView extends Component {
 
@@ -27,19 +25,21 @@ export default class HitView extends Component {
     runnerAtBase = [];
     runnerNames = [];
     resetBaseRunners = [];
+
+
     constructor(props){
         console.log("Construct HitView");
   
         super(props);
         //props should be baserunner array
-        this.baseRunners = [0,1,2,3];
+        this.baseRunners = [0,1,-1,3];
         this.runnerNames = ['HT', 'R1', 'R2', 'R3'];
-        this.runnerAtBase = [-1,-1,-1,-1,-1,-1,-1,-1];
+        this.runnerAtBase = [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1];
         this.resetBaseRunners = [...this.baseRunners];
 
         //put runners at their bases:
         for (var i = 0;i < this.baseRunners.length; i++) {
-          this.runnerAtBase[this.baseRunners[i]] = i;
+          if (this.baseRunners[i] >= 0) this.runnerAtBase[i] = i;
         }
         console.log(this.runnerAtBase);
 
@@ -60,79 +60,83 @@ export default class HitView extends Component {
     componentWillUnmount() {
       console.log("UNMOUNTT!");
       //This is where I update gamestate:
-      
+
     }
 
     resetRunners = () => {
 
-
-      console.log(this.resetBaseRunners);
+ 
       this.baseRunners = [...this.resetBaseRunners];
-      this.runnerAtBase = [-1,-1,-1,-1,-1,-1,-1,-1];
+      this.runnerAtBase = [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1];
       //put runners at their bases:
       for (var i = 0;i < this.baseRunners.length; i++) {
-        this.runnerAtBase[this.baseRunners[i]] = i;
+        this.runnerAtBase[i] = i;
       }
-      console.log(this.runnerAtBase);
+
       this.setState( { selectedPosition: -1});
       
     }
    
     advanceRunner = (ix) => {
-    
-      if (this.runnerAtBase[(ix + 1)] != -1) {
-        this.advanceRunner(ix + 1);
+      console.log("Advance " + ix);
+      console.log(this.runnerAtBase);
+      if (this.runnerAtBase[(ix)] != -1) {
+        this.advanceRunner(ix+1);
       }
         
-      this.runnerAtBase[(ix + 1)] = this.runnerAtBase[ix];
-      this.runnerAtBase[ix] = -1
+      this.runnerAtBase[(ix)] = this.runnerAtBase[ix-1];
+      this.runnerAtBase[ix-1] = -1;
       
     }
-
-    insertAtEnd = (ix, playerIX) => {
-      //Insert at end of list
-      if (this.runnerAtBase[(ix)] != -1) {
-        this.insertAtEnd(ix-1,this.runnerAtBase[(ix)]);
-      }
-      this.runnerAtBase[(ix)] = playerIX;
-    }
-
 
     resolveRunners = (startingPos, endPos) => {
 
       console.log(`resolving pos ${startingPos} moving to ${endPos}`);
-      console.log(this.runnerAtBase);
-      console.log(this.baseRunners);
 
-      //Bases Advanced:
+
       var advance = (endPos - startingPos);
+      if (advance < 0)  advance=1; //in this case we are resolve from out to run
+    
+ 
       var playerIX = this.runnerAtBase[startingPos];
 
       if (endPos > 4)
       {
         //OUT!
-        console.log("insert at end");
+        console.log("Out " + playerIX);
+        console.log(this.runnerAtBase);
         //insert at end of list and shift the other run positions:
-        this.runnerAtBase[startingPos] = -1;
-        this.insertAtEnd(7, playerIX);
+        for (var i = OUTOFFSET;i < this.runnerAtBase.length;i++)
+        {
+          if (this.runnerAtBase[i] == -1 || this.runnerAtBase[i] == playerIX)
+          {
+            this.runnerAtBase[startingPos] = -1;
+            this.runnerAtBase[i] = playerIX;
+
+            break;
+          }
+        }
+        console.log("Aft");
         console.log(this.runnerAtBase);
 
-        this.baseRunners[playerIX] = -1;
       } else { 
 
-    
+
         while (advance > 0) {
-          console.log("Advancing " + advance + " starting at " + startingPos);
-          this.advanceRunner(startingPos);
+
+          this.advanceRunner(startingPos+1);
           --advance;
           ++startingPos;
         }
 
         //put runners at their new bases:
+        /*
         for (var i = 0;i < this.runnerAtBase.length; i++) {
           var runner = this.runnerAtBase[i];
-          if (runner >= 0) this.baseRunners[runner] = Math.min(i,4);
+          if (runner >= 0 && this.baseRunners[runner] != -1) this.baseRunners[runner] = Math.min(i,4);
         }
+        */
+
       }
 
       this.setState( {
@@ -140,11 +144,6 @@ export default class HitView extends Component {
         selectedPosition: -1
       });
 
-      console.log(this.runnerAtBase);
-
-      console.log(this.baseRunners);
-
- 
     }
 
     onPress = (position) => {
@@ -169,8 +168,8 @@ export default class HitView extends Component {
         if (baseRunnerIx >= 0)
         {
 
-          if (this.baseRunners[baseRunnerIx] < 0) /*out*/ stylesColor = {     backgroundColor: 'red'}
-          else if (this.baseRunners[baseRunnerIx] == 4) stylesColor = {     backgroundColor: '#00CC00'}
+          if (i >= OUTOFFSET) /*out*/ stylesColor = {     backgroundColor: 'red'}
+          else if (i >= 4) /*run*/ stylesColor = {     backgroundColor: '#00CC00'}
           else /*default*/ stylesColor = {     backgroundColor: 'yellow'};
 
           runnerJSX = [...runnerJSX,
@@ -331,7 +330,25 @@ const stylesPos = [
     position: 'absolute',
     left: 0,
     top: 600,
-  }
+  },
+  {
+    //Out 1:
+    position: 'absolute',
+    left: 0,
+    top: 540,
+  },
+  {
+    //Out 2:
+    position: 'absolute',
+    left: 60,
+    top: 540,
+  },
+  {
+    //Out 3:
+    position: 'absolute',
+    left: 120,
+    top: 540,
+  },
 ];
 
 const trigStyles = {
