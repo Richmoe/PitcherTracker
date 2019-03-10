@@ -23,7 +23,7 @@ export default class HitView extends Component {
     fieldWidth;
     fieldHeight;
 
-    runnerAtBase = []; //11 elem array = 0 for hitter, 1-3 for base, 4-7 for run scored, 8-11 for outs 
+    runnerAtBase = []; //11 elem array = 0 for hitter, 1-3 for base, 4-7 for run scored, 8-10 for outs 
     baseRunners = [];
 
 
@@ -51,6 +51,7 @@ export default class HitView extends Component {
           resolveCallback: this.props.navigation.getParam("resolve", null),
         };
        
+        console.log(`HitView onBase: ${this.runnerAtBase}`);
 
 
     }
@@ -64,25 +65,21 @@ export default class HitView extends Component {
     }
 
     componentWillUnmount() {
-      console.log("UNMOUNTT!");
       //This is where I update gamestate:
-
+      console.log(`Leave Hitview runnerOnBase: ${this.runnerAtBase}`);
       if (this.state.resolveCallback) this.state.resolveCallback(this.runnerAtBase);
 
     }
 
     resetRunners = () => {
       //This will reset the runner-at-base array which is:
-      // 0-4 = Original starting baserunners
-      // 5-8 = Runs scored
-      // 9-11 = Outs (max 3)
+      // 0-3 = Original starting baserunners
+      // 4-7 = Runs scored
+      // 8-10 = Outs (max 3)
       this.runnerAtBase = [...this.baseRunners, -1,-1,-1,-1,  -1,-1,-1];
-    
     }
    
     advanceRunner = (ix) => {
-      console.log("Advance " + ix);
-      console.log(this.runnerAtBase);
       if (this.runnerAtBase[(ix)] != -1) {
         this.advanceRunner(ix+1);
       }
@@ -102,8 +99,6 @@ export default class HitView extends Component {
       if (endPos > 4)
       {
         //OUT!
-        console.log("Out " + playerIX);
-        console.log(this.runnerAtBase);
         //insert at end of list and shift the other run positions:
         for (var i = OUTOFFSET;i < this.runnerAtBase.length;i++)
         {
@@ -115,15 +110,12 @@ export default class HitView extends Component {
             break;
           }
         }
-        console.log("Aft");
-        console.log(this.runnerAtBase);
+
 
       } else { 
         if (startingPos > endPos)
         {
           //move from out to run
-          console.log("Run " + playerIX);
-          console.log(this.runnerAtBase);
           //insert at end of list and shift the other run positions:
           for (var i = 4;i < this.runnerAtBase.length;i++)
           {
@@ -135,9 +127,6 @@ export default class HitView extends Component {
               break;
             }
           }
-          console.log("Aft");
-          console.log(this.runnerAtBase);
-
 
         } else {
           //Advance all base runners
@@ -157,7 +146,6 @@ export default class HitView extends Component {
     }
 
     onPress = (position) => {
-      console.log("Menu open, selected position: " + position);
       this.setState( 
         {menuOpen: !this.state.menuOpen,
         selectedPosition: position });
@@ -165,7 +153,6 @@ export default class HitView extends Component {
     }
 
     onMenuSelect = (value) => {
-      console.log("menu select " + this.state.selectedPosition + ", Value: " + value);
       this.resolveRunners(this.state.selectedPosition, value);
     }
 
@@ -179,7 +166,6 @@ export default class HitView extends Component {
     }
 
     getFName = (positionIx) => {
-      console.log("Get FName for pos " + positionIx);
       var runnerIx = this.runnerAtBase[positionIx];
       if (positionIx == -1) {
         return "";
@@ -219,7 +205,6 @@ export default class HitView extends Component {
 
 
     renderMenuOptions = () => {
-      console.log(`render menu ${this.state.selectedPosition}`);
       if (this.state.selectedPosition == 0)
       { 
         return (
@@ -244,8 +229,6 @@ export default class HitView extends Component {
     }
 
     render() {
-        console.log("Rendering with pos " + this.state.selectedPosition);
-
          return (
           <MenuProvider>
             <View style={styles.container} onLayout = {(event) => this.onLayout(event)} >

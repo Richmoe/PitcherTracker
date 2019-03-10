@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Col, Row, Grid } from 'react-native-easy-grid';
+import { Menu, MenuProvider, MenuOptions, MenuOption, MenuTrigger} from "react-native-popup-menu";
 
 export default class FieldView extends Component {
 
@@ -17,13 +18,13 @@ export default class FieldView extends Component {
     fieldY;
     fieldWidth;
     fieldHeight;
-    baseRunners = [];
+
     constructor(props){
         console.log("Construct FieldView");
   
         super(props);
-        //props should be baserunner array
-        this.baseRunners = [1,2,3];
+        //props should be current baserunner array where 0 elem = batter
+
 
     }
 
@@ -39,15 +40,17 @@ export default class FieldView extends Component {
     renderBaserunners = () =>
     {
         runnerJSX = [];
-        for (var i = 0;i < this.baseRunners.length;i++)
+        for (var i = 1;i < this.props.baseRunners.length;i++)
         {
-            if (this.baseRunners[i] != 0)
+            if (this.props.baseRunners[i] > 0)
             {
+
                 runnerJSX = [...runnerJSX,
                     <TouchableOpacity key={i}> 
-                        <Text style = {[styles.circleButton, stylesPos[i]]}>X</Text>
+                        <Text style = {[styles.circleButton, stylesPos[i-1]]}>X</Text>
                     </TouchableOpacity >
                 ];
+
             }
         }
 
@@ -59,13 +62,17 @@ export default class FieldView extends Component {
 
     render() {
         return (
+
             <Grid style={styles.container}> 
             <Row onLayout = {(event) => this.onLayout(event)}>
                 <ImageBackground  source={require('./baseballDiamond1.jpg')} style={styles.image}>
+
                     {this.renderBaserunners()}
+
                 </ImageBackground>
             </Row>
             </Grid>
+
         );
     }
 }

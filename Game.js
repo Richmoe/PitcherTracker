@@ -20,6 +20,7 @@ import HitView from './HitView.js';
 import GameParams from './GameParams.js';
 
 export default class Game extends Component {
+    onBase;
 
     constructor(props) {
         console.log("Setting up Game ");
@@ -50,6 +51,8 @@ export default class Game extends Component {
         }
         console.log(teamStats);
 
+        this.onBase = [100,-1,-1,-1];
+
         this.state = {
             opponentName: "Opp",
             inning: 0,
@@ -63,9 +66,10 @@ export default class Game extends Component {
             currentPitcher: curPitcher,
             teamData: teamStats,
             batterUp: 0,
-            onBase: [-1,-1,-1,-1],
-
+ 
         }
+
+
         this.pitch = this.pitch.bind(this);
 
         //create 2d array for scores
@@ -83,30 +87,56 @@ export default class Game extends Component {
         return this.state.teamData[id].name;
     }
 
+    setBatter (batter) {
+      
+
+      this.onBase[0] = batter;
+
+      console.log(`onBase: ${this.onBase}`);
+    }
+
     nextBatter() {
         this.setState( { balls : 0, strikes: 0 });
         if (this.isBatting()) {
-          this.setState( {batterUp: ((this.state.batterUp + 1 ) % this.state.teamData.length) }) ;
+          batterUp = ((this.state.batterUp + 1 ) % this.state.teamData.length);
+          this.setState( {batterUp: batterUp }) ;
+        } else {
+          batterUp = 100;
         }
+        this.setBatter(batterUp);
+
     };
 
     newInning() {
-        console.log("Is batting is " + this.isBatting());
+
+        if (this.isBatting()) {
+          //Date and store off next batter
+          batterUp = ((this.state.batterUp + 1 ) % this.state.teamData.length);
+          this.setState( {batterUp: batterUp }) ;
+
+          //onBase for next round:
+          this.onBase = [100,-1,-1,-1];
+        } else {
+          //We're going up to bat:
+         this. onBase = [this.state.batterUp, -1, -1, -1]
+        }
         this.setState ( {
             inning : this.state.inning + 1,
             outs: 0,
             runs: 0,
             balls: 0,
-            strikes: 0
+            strikes: 0,
         });
+
+        console.log(`New inning: ${this.state.inning+1}, starting onBase: ${this.onBase}`);
     };
 
     scoreRun(player, pitcher, runcount = 1) //Need to figure out RBIs etc.
     {
+      console.log("Score run " + runcount);
         var newScore = this.state.score;
         newScore[this.state.inning % 2] += runcount;
         this.setState ( {
-            runs : runs + runcount,
             score : newScore
         });
     };
@@ -134,7 +164,8 @@ export default class Game extends Component {
 
         if (pitchType === 'hit')
         {
-          this.props.navigation.navigate('HitScreen', { roster: this.state.teamData, baseRunners: [100,-1,-1,101], resolve: this.resolveHit });
+
+          this.props.navigation.navigate('HitScreen', { roster: this.state.teamData, baseRunners: this.onBase, resolve: this.resolveHit });
 
           return;
         }
@@ -161,9 +192,11 @@ export default class Game extends Component {
         {
             //strikeout
             this.setState( { outs: this.state.outs + 1});
-            this.nextBatter();
+
             if (curOutCount >= 2){
                 this.newInning();
+            } else {
+              this.nextBatter();
             }
         } else if (curBallCount >= 4) {
             //Walk
@@ -235,6 +268,14 @@ export default class Game extends Component {
       this.setState ( {machinePitch : !this.state.machinePitch});
     }
 
+    totalRunners = (total, num) => {
+      if (num > 0) {
+        return (total + 1);
+      } else {
+        return total;
+      }
+    }
+
     resolveHit = (runnersOnBase) => {
       //This is where we determine who ended where
       if (this.isBatting()) {
@@ -243,6 +284,40 @@ export default class Game extends Component {
         console.log("resolveHit is fielding");
       }
       console.log(runnersOnBase);
+
+      //Store current Batter:
+
+      //Get updated onBase
+      this.onBase = runnersOnBase.slice(0,4);
+
+      console.log(`onBase: ${this.onBase}`);
+
+      //Find batter:
+      var batterLoc = runnersOnBase.indexOf(this.state.batterUp);
+      console.log(`batter advanced to ${batterLoc}`);
+
+      //get runs:
+      var runs = runnersOnBase.slice(4,8);
+      var runCount = runs.reduce(this.totalRunners,0);
+      console.log("runCount " + runCount);
+      console.log(runs);
+      if (runCount > 0)  this.scoreRun(0,0,runCount);
+
+
+      //get outs:
+      var outs = runnersOnBase.slice(8,11);
+      var outCount = outs.reduce(this.totalRunners,0);
+      if (outCount > 0) {
+        var curOutCount = this.state.outs + outCount;
+        this.setState( { outs: curOutCount });
+        if (curOutCount >= 2){
+          this.newInning();
+        } else {
+          this.nextBatter();
+        }
+      } else {
+        this.nextBatter();
+      }
     }
 
     render() {
@@ -268,7 +343,7 @@ export default class Game extends Component {
           </Row>
 
           <Row size={55}>
-            { true && <FieldView />}
+            { true && <FieldView baseRunners={this.onBase} />}
           </Row>
           <Row size={20}>
           <GameState style={styles.gamestate}

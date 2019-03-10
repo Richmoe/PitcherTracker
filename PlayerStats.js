@@ -28,6 +28,7 @@ class BatterStats {
 export default class PlayerStats {
 
     name;
+    abbrev;
     battingOrder = 0;
     pitcherStats = new PitcherStats();
     batterStats = new BatterStats()
@@ -38,5 +39,16 @@ export default class PlayerStats {
         this.name = playername;
         this.battingOrder = battingOrder;
         this.positionByInning[0] = position;
+        this.abbrev = this.makeAbbrev(playername);
     }
+
+    makeAbbrev = (name) => {
+        names = name.split(" ");
+        abbrev = "";
+        for (const s of names) {
+            abbrev += s[0];
+        }
+        return abbrev;
+    }
+
 }
