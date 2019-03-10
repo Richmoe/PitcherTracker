@@ -14,6 +14,7 @@ import { Menu, MenuProvider, MenuOptions, MenuOption, MenuTrigger} from "react-n
 import GameState from './GameState.js';
 
 const OUTOFFSET=8;
+const OPPONENTHITTER = 100;
 
 export default class HitView extends Component {
 
@@ -21,33 +22,45 @@ export default class HitView extends Component {
     fieldY;
     fieldWidth;
     fieldHeight;
-    baseRunners = [];
+
     runnerAtBase = [];
-    runnerNames = [];
+
     resetBaseRunners = [];
 
 
     constructor(props){
         console.log("Construct HitView");
   
-
         super(props);
         //props should be baserunner array
-        this.baseRunners = [0,1,-1,3];
-        this.runnerNames = ['HT', 'R1', 'R2', 'R3'];
+
         this.runnerAtBase = [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1];
-        this.resetBaseRunners = [...this.baseRunners];
 
-        //put runners at their bases:
-        for (var i = 0;i < this.baseRunners.length; i++) {
-          if (this.baseRunners[i] >= 0) this.runnerAtBase[i] = i;
+        //baseRunners is a 4elem array with the player IX of the runner on that base; 0 = hitter
+        //playerIX >= OPPONENTHITTER is other team
+        baseRunners = this.props.navigation.getParam("baseRunners", [0, 1, 2, 3]);
+
+        if (this.props.navigation) {
+          console.log("passed Roster");
+          console.log(this.props.navigation.getParam("roster", []));    
+          console.log(baseRunners);
+          
         }
-        console.log(this.runnerAtBase);
+       
 
-        this.state = { menuOpen: false,
-          selectedPosition: -1
+        this.state = { 
+          menuOpen: false,
+          selectedPosition: 0,
+          roster: this.props.navigation.getParam("roster", []),
+          baseRunners: baseRunners
         };
        
+        //put runners at their bases:
+        for (var i = 0;i < baseRunners.length; i++) {
+          if (baseRunners[i] >= 0) this.runnerAtBase[i] = i;
+        }
+        console.log(this.runnerAtBase);
+        this.resetBaseRunners = [...baseRunners];
     }
 
     onLayout = (event) => {
@@ -67,15 +80,14 @@ export default class HitView extends Component {
     resetRunners = () => {
 
  
-      this.baseRunners = [...this.resetBaseRunners];
+      this.setState( {baseRunners : [...this.resetBaseRunners] });
       this.runnerAtBase = [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1];
       //put runners at their bases:
-      for (var i = 0;i < this.baseRunners.length; i++) {
-        if (this.baseRunners[i] >= 0) this.runnerAtBase[i] = i;
+      for (var i = 0;i < this.resetBaseRunners.length; i++) {
+        if (this.resetBaseRunners[i] >= 0) this.runnerAtBase[i] = i;
       }
 
-      this.setState( { selectedPosition: -1});
-      
+    
     }
    
     advanceRunner = (ix) => {
@@ -167,6 +179,31 @@ export default class HitView extends Component {
       this.resolveRunners(this.state.selectedPosition, value);
     }
 
+    getAbbrev = (positionIx) => {
+      var runnerIx = this.runnerAtBase[positionIx];
+      if (runnerIx >= OPPONENTHITTER) {
+        return "P"+( runnerIx - OPPONENTHITTER + 1);
+      } else {
+        return this.state.roster[runnerIx].abbrev;
+      }
+    }
+
+    getFName = (positionIx) => {
+      console.log("Get FName for pos " + positionIx);
+      var runnerIx = this.runnerAtBase[positionIx];
+      if (positionIx == -1) {
+        return "";
+      } else if (runnerIx == OPPONENTHITTER) {
+        return "Batter";
+      } else if (runnerIx >= OPPONENTHITTER) {
+        return "Player "+( runnerIx - OPPONENTHITTER + 1); 
+      } else {
+        //Our team
+        var names = this.state.roster[runnerIx].name.split(" ");
+        return names[0];
+      }
+    }
+
     renderBaserunners = () =>
     {
       runnerJSX = [];
@@ -182,7 +219,7 @@ export default class HitView extends Component {
 
           runnerJSX = [...runnerJSX,
               <TouchableOpacity key={i} style = {[styles.circleButton, stylesColor, stylesPos[i]]} onPress = {() => this.onPress(i)}> 
-                  <Text style ={styles.buttonText}>{this.runnerNames[this.runnerAtBase[i]]}</Text>
+                  <Text style ={styles.buttonText}>{this.getAbbrev(i)}</Text>
               </TouchableOpacity >
           ];
         }
@@ -230,7 +267,7 @@ export default class HitView extends Component {
                 <Menu opened={this.state.menuOpen} onSelect={(value) => this.onMenuSelect(value)}>
                   <MenuTrigger customStyles={trigStyles} disabled={true}/>
                   <MenuOptions customStyles={optionStyles}>
-                    <MenuOption disabled={true}><Text style={{fontSize: 28, fontWeight: 'bold'}}>{this.runnerNames[this.runnerAtBase[this.state.selectedPosition]]}</Text></MenuOption>
+                    <MenuOption disabled={true}><Text style={{fontSize: 28, fontWeight: 'bold'}}>{this.getFName(this.state.selectedPosition)}</Text></MenuOption>
                     {this.renderMenuOptions()}
                   </MenuOptions>
                 </Menu>

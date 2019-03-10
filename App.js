@@ -20,6 +20,7 @@ import { createStackNavigator, createAppContainer } from "react-navigation";
 import Game from "./Game";
 import LayoutTest from './LayoutTest';
 import RosterView from './RosterView';
+import HitView from './HitView';
 
 
 class Home extends Component {
@@ -125,8 +126,8 @@ class Home extends Component {
           onPress={() => this.props.navigation.navigate('LayoutScreen', { roster: this.state.roster})}
         />
         <Button
-          title="Roster Test"
-          onPress={() => this.props.navigation.navigate('RosterScreen', { roster: this.state.roster})}
+          title="Hit Test"
+          onPress={() => this.props.navigation.navigate('HitScreen', { roster: this.state.roster})}
         />
       </View>
     );
@@ -137,8 +138,8 @@ class Home extends Component {
 const AppNavigator = createStackNavigator({
     HomeScreen: Home,
     GameScreen: Game,
-    LayoutScreen: LayoutTest,
     RosterScreen: RosterView,
+    HitScreen: HitView,
     },
     {
         initialRouteName: "HomeScreen"

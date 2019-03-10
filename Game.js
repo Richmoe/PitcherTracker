@@ -16,6 +16,8 @@ import PitchState from './PitchState.js';
 import BatterState from './BatterState.js';
 import PlayerStats from './PlayerStats.js';
 import FieldView from './FieldView.js';
+import HitView from './HitView.js';
+import GameParams from './GameParams.js';
 
 export default class Game extends Component {
 
@@ -23,14 +25,16 @@ export default class Game extends Component {
         console.log("Setting up Game ");
         super(props);
 
-        const url = require('./baseballDiamond1.jpg');
-        const image = Image.resolveAssetSource(url);
-        console.log(image);
+        temp = new GameParams(5,true,"Opponent",true);
 
-
-
+        console.log("2");
         //game roster contains batting order & starting field position
-        var gameRoster = this.props.navigation.getParam("roster", []);
+        gameRoster = this.props.navigation.getParam("roster", []);
+        gameParams = this.props.navigation.getParam("GameParams", temp);
+
+        //Make sure we sort by battingOrder        
+        gameRoster.sort((a,b) => a.battingOrder - b.battingOrder);
+
 
         //Create teamStats:
         teamStats = [];
@@ -44,19 +48,21 @@ export default class Game extends Component {
             curPitcher = i;
           }
         }
+        console.log(teamStats);
 
         this.state = {
             opponentName: "Opp",
             inning: 0,
-            isHome: true,
+            machinePitch: gameParams.machinePitch,
             score: [],
-            maxInning: 9,
+            gameParams: gameParams,
             outs: 0, 
             runs: 0,
             balls: 0,
             strikes: 0,
             currentPitcher: curPitcher,
-            teamData: teamStats
+            teamData: teamStats,
+            batterUp: 0
 
         }
         this.pitch = this.pitch.bind(this);
@@ -70,7 +76,7 @@ export default class Game extends Component {
     inningNumber = () => { return Math.floor(this.state.inning / 2) + 1};
 
     
-    isBatting = () =>  ((this.state.inning % 2) && this.state.isHome);
+    isBatting = () =>  ((this.state.inning % 2) && this.state.gameParams.isHome);
 
     getName (id) {
         return this.state.teamData[id].name;
@@ -78,8 +84,10 @@ export default class Game extends Component {
 
     nextBatter() {
         this.setState( { balls : 0, strikes: 0 });
+        if (this.isBatting()) {
+          this.setState( {batterUp: ((this.state.batterUp + 1 ) % this.state.teamData.length) }) ;
+        }
     };
-    
 
     newInning() {
         console.log("Is batting is " + this.isBatting());
@@ -119,15 +127,18 @@ export default class Game extends Component {
     }
 
 
-    hit(player, pitcher, loc){};
-
-    out(player, pitcher, outType){};
-
-    base(player, pitcher, baseType) {};
 
     pitch = (pitchType) => {
         //Update total pitch count if we're not at bat
-        if (!this.isBatting())  this.updatePitcherStats(pitchType);
+
+        if (pitchType === 'hit')
+        {
+          this.props.navigation.navigate('HitScreen', { roster: this.state.teamData, baseRunners: [100,-1,-1,101]});
+
+          return;
+        }
+
+        if (!this.isBatting() && !this.state.machinePitch)  this.updatePitcherStats(pitchType);
 
         curStrikeCount = this.state.strikes;
         curBallCount = this.state.balls;
@@ -149,10 +160,9 @@ export default class Game extends Component {
         {
             //strikeout
             this.setState( { outs: this.state.outs + 1});
+            this.nextBatter();
             if (curOutCount >= 2){
                 this.newInning();
-            } else {
-                this.nextBatter();
             }
         } else if (curBallCount >= 4) {
             //Walk
@@ -168,7 +178,7 @@ export default class Game extends Component {
 
     onPitcherClick = () => {
 
-
+      console.log("OPC!");
       //Create Roster view data. God this is ugly
       tempExtraData = [];
       for (var i = 0;i < this.state.teamData.length;i++) {
@@ -178,6 +188,19 @@ export default class Game extends Component {
 
       this.props.navigation.navigate('RosterScreen', { roster: this.state.teamData, extraData: tempExtraData, formatRow: [80, 20], callBack: this.onPitcherChange});
     };
+
+
+    onBatterClick = () => {
+      //Create Roster view data. God this is ugly
+      console.log("OBC!");
+      tempExtraData = [];
+      for (var i = 0;i < this.state.teamData.length;i++) {
+        tempExtraData.push({Batting: this.state.teamData[i].battingOrder + 1});
+      }
+      console.log(tempExtraData);
+      this.props.navigation.navigate('RosterScreen', { roster: this.state.teamData, extraData: tempExtraData, formatRow: [80,20]});
+
+   }
 
     setPlayerPosition = (playerIx, fieldPos) => {
         var temp = [...this.state.teamData];
@@ -207,17 +230,20 @@ export default class Game extends Component {
       console.log(this.state.teamData);
     }
 
+    onMachineChange = () => {      //console.log("got machine change");
+      this.setState ( {machinePitch : !this.state.machinePitch});
+    }
 
     render() {
-      console.log("Is batting is " + this.isBatting());    
+ 
       return (
         <Grid style={styles.container}>
 
           <Row size={10}>
             {!this.isBatting() ? 
-              <PitchState onPitcherChange = {this.onPitcherClick} currentPitcher = {this.state.teamData[this.state.currentPitcher]} />
+              <PitchState onPitcherChange = {this.onPitcherClick} onMachineChange = {this.onMachineChange} isMachinePitch={this.state.machinePitch} currentPitcher = {this.state.teamData[this.state.currentPitcher]} />
               :
-              <BatterState roster={this.state.teamData} curBatter= {0}/>
+              <BatterState roster={this.state.teamData} onClick = {this.onBatterClick} curBatter= {this.state.batterUp}/>
             }
           </Row>
 
