@@ -25,7 +25,6 @@ export default class BatterState extends Component {
 
         this.state = {
           battingOrder : tempRoster,
-          curBatter : this.props.curBatter
         }
 
     }
@@ -33,28 +32,37 @@ export default class BatterState extends Component {
     batterNameAndOrder = (batterNum) => {
       
       var num = batterNum % this.state.battingOrder.length;
+      name = this.state.battingOrder[num].name;
+      if (batterNum != this.props.curBatter) {
+        //first name
+        name = name.split(" ")[0];
+      }
 
-      return (num+1) + ". " + this.state.battingOrder[num].name;
+      return (num+1) + ". " + name;
  
     }
  
     render() {
       return (
         <Row>
+   
             <Col size={15}>
                 <Image style={styles.batImage} source={require("./baseball-bat.png")} />
             </Col>
             <Col size={50}>
-                <Text style={styles.batter}>{this.batterNameAndOrder(this.state.curBatter)}</Text>
+                <TouchableOpacity onPress={() => this.props.onClick()}>   
+                  <Text style={styles.batter}>{this.batterNameAndOrder(this.props.curBatter)}</Text>
+                </TouchableOpacity>
             </Col>
             <Col size={35} >
                 <Row >
-                    <Text style={styles.onDeck}>{this.batterNameAndOrder(this.state.curBatter + 1)}</Text>
+                    <Text style={styles.onDeck}>{this.batterNameAndOrder(this.props.curBatter + 1)}</Text>
                 </Row>
                 <Row>
-                    <Text style={styles.onDeck}>{this.batterNameAndOrder(this.state.curBatter + 2)}</Text>
+                    <Text style={styles.onDeck}>{this.batterNameAndOrder(this.props.curBatter + 2)}</Text>
                 </Row>
             </Col>
+
         </Row>
       );
    
