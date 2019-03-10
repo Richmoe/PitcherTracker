@@ -43,11 +43,12 @@ export default class HitView extends Component {
 
         //put runners at their bases:
         this.resetRunners();
-        
+
         this.state = { 
           menuOpen: false,
           selectedPosition: 0,
           roster: this.props.navigation.getParam("roster", []),
+          resolveCallback: this.props.navigation.getParam("resolve", null),
         };
        
 
@@ -65,6 +66,8 @@ export default class HitView extends Component {
     componentWillUnmount() {
       console.log("UNMOUNTT!");
       //This is where I update gamestate:
+
+      if (this.state.resolveCallback) this.state.resolveCallback(this.runnerAtBase);
 
     }
 

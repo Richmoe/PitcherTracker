@@ -62,7 +62,8 @@ export default class Game extends Component {
             strikes: 0,
             currentPitcher: curPitcher,
             teamData: teamStats,
-            batterUp: 0
+            batterUp: 0,
+            onBase: [-1,-1,-1,-1],
 
         }
         this.pitch = this.pitch.bind(this);
@@ -133,7 +134,7 @@ export default class Game extends Component {
 
         if (pitchType === 'hit')
         {
-          this.props.navigation.navigate('HitScreen', { roster: this.state.teamData, baseRunners: [100,-1,-1,101]});
+          this.props.navigation.navigate('HitScreen', { roster: this.state.teamData, baseRunners: [100,-1,-1,101], resolve: this.resolveHit });
 
           return;
         }
@@ -232,6 +233,16 @@ export default class Game extends Component {
 
     onMachineChange = () => {      //console.log("got machine change");
       this.setState ( {machinePitch : !this.state.machinePitch});
+    }
+
+    resolveHit = (runnersOnBase) => {
+      //This is where we determine who ended where
+      if (this.isBatting()) {
+        console.log("resolveHit is batting");
+      } else {
+        console.log("resolveHit is fielding");
+      }
+      console.log(runnersOnBase);
     }
 
     render() {
