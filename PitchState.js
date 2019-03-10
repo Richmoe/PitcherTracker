@@ -4,6 +4,7 @@ import {
   Text, 
   TouchableOpacity,
   Image,
+  View,
 } from 'react-native';
 import { Col, Row, Grid } from 'react-native-easy-grid';
 
@@ -14,14 +15,17 @@ export default class PitchState extends Component {
       return (
           <Row size={1} style={styles.container}>
             <Col size={15}>
-                <Image style={{marginTop: 20, marginLeft: 5, width: 75, height: 75}} source={require("./small-baseball.png")} />
+                <TouchableOpacity onPress={() => this.props.onMachineChange()}>  
+                    <Image style={{marginTop: 20, marginLeft: 5, width: 75, height: 75}} source={this.props.isMachinePitch ? require("./pitchingMachine.jpg") : require("./small-baseball.png")} />
+                </TouchableOpacity>
             </Col>
             <Col size={60}>
                 <TouchableOpacity onPress={() => this.props.onPitcherChange()}>       
                     <Text style={styles.welcome}>{this.props.currentPitcher.name}</Text>
                 </TouchableOpacity>   
             </Col>
-            <Col size={25} >
+            {this.props.isMachinePitch && <Col size={25} />}
+            {!this.props.isMachinePitch && <Col size={25} >
                 <Row >
                     <Col>
                         <Text style={styles.pitchdata}>Balls:</Text>
@@ -46,7 +50,10 @@ export default class PitchState extends Component {
                         <Text style={styles.totaldata}>{(this.props.currentPitcher.pitcherStats.balls + this.props.currentPitcher.pitcherStats.strikes)}</Text>
                     </Col>                   
                 </Row>
+
+                
             </Col>
+            }
           </Row>
       );
    
