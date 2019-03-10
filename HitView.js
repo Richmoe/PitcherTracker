@@ -23,9 +23,8 @@ export default class HitView extends Component {
     fieldWidth;
     fieldHeight;
 
-    runnerAtBase = [];
-
-    resetBaseRunners = [];
+    runnerAtBase = []; //11 elem array = 0 for hitter, 1-3 for base, 4-7 for run scored, 8-11 for outs 
+    baseRunners = [];
 
 
     constructor(props){
@@ -34,33 +33,25 @@ export default class HitView extends Component {
         super(props);
         //props should be baserunner array
 
-        this.runnerAtBase = [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1];
+        //Runner at Base contains baseRunner IDs
+        //this.runnerAtBase = [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1];
 
         //baseRunners is a 4elem array with the player IX of the runner on that base; 0 = hitter
         //playerIX >= OPPONENTHITTER is other team
-        baseRunners = this.props.navigation.getParam("baseRunners", [0, 1, 2, 3]);
+        //This will hold the starting state of the hit, in case we want to reset.
+        this.baseRunners = this.props.navigation.getParam("baseRunners", [0, 1, 2, 3]);
 
-        if (this.props.navigation) {
-          console.log("passed Roster");
-          console.log(this.props.navigation.getParam("roster", []));    
-          console.log(baseRunners);
-          
-        }
-       
-
+        //put runners at their bases:
+        this.resetRunners();
+        
         this.state = { 
           menuOpen: false,
           selectedPosition: 0,
           roster: this.props.navigation.getParam("roster", []),
-          baseRunners: baseRunners
         };
        
-        //put runners at their bases:
-        for (var i = 0;i < baseRunners.length; i++) {
-          if (baseRunners[i] >= 0) this.runnerAtBase[i] = i;
-        }
-        console.log(this.runnerAtBase);
-        this.resetBaseRunners = [...baseRunners];
+
+
     }
 
     onLayout = (event) => {
@@ -78,15 +69,11 @@ export default class HitView extends Component {
     }
 
     resetRunners = () => {
-
- 
-      this.setState( {baseRunners : [...this.resetBaseRunners] });
-      this.runnerAtBase = [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1];
-      //put runners at their bases:
-      for (var i = 0;i < this.resetBaseRunners.length; i++) {
-        if (this.resetBaseRunners[i] >= 0) this.runnerAtBase[i] = i;
-      }
-
+      //This will reset the runner-at-base array which is:
+      // 0-4 = Original starting baserunners
+      // 5-8 = Runs scored
+      // 9-11 = Outs (max 3)
+      this.runnerAtBase = [...this.baseRunners, -1,-1,-1,-1,  -1,-1,-1];
     
     }
    
